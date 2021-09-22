@@ -14,23 +14,26 @@ def scenario_1_delete_all_pods(couchserver, namespace, n_rows, db_names):
     print(f"executing scenario 1")
     # Clear DBS
     print(f"cleaning dbs")
-    clear_dbs(couchserver)
+    # clear_dbs(couchserver)
 
     # Generate mock data
     fake_data = generate_random_data(n_rows)
 
     # Populate dbs with mock data
-    for db_name in db_names:
-        populate_db(select_or_create_db(couchserver, db_name), fake_data)
+    # for db_name in db_names:
+    #     populate_db(select_or_create_db(couchserver, db_name), fake_data)
 
     # Get pods
     pods = get_pods(namespace)
 
+    # Watch Pods
+    # watch_pods(namespace)
+
     # Delete pods
-    delete_pods(pods, namespace)
+    # delete_pods(pods, namespace)
 
     # Compare data with the database data
-    compare_data(couchserver, fake_data)
+    # compare_data(couchserver, fake_data)
 
 
 def scenario_2_delete_some_pods(couchserver, namespace, n_rows, db_names):
