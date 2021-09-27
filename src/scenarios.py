@@ -1,8 +1,10 @@
+import time
+import logging
 from src.couch import *
 from src.k8s import *
 
 
-def scenario_1_delete_all_pods(couchserver, namespace, n_rows, db_names):
+def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     """Scenario 1:
 
     - Clear dbs
@@ -10,29 +12,45 @@ def scenario_1_delete_all_pods(couchserver, namespace, n_rows, db_names):
     - Populate with mock data
     - Get pods and load in list
     - Delete all pods in namespace
+
+    :param Object couchserver: CouchDB Client Object
+    :param str namespace: Kubernetes namespace
+    :param int n_rows: Number of rows to insert in DBs
+    :param list db_names: Names of the dbs to insert data
+    :param list pods: Pod names to manipulate 
+    :return: True or false
     """
     print(f"executing scenario 1")
+
+    # Connect to client couchdb
+    couchdb_client = get_couch_client(couchdb_url)
+
     # Clear DBS
-    clear_dbs(couchserver)
+    clear_dbs(couchdb_client)
 
     # Generate mock data
     fake_data = generate_random_data(n_rows)
 
     # Populate dbs with mock data
     for db_name in db_names:
-        populate_db(select_or_create_db(couchserver, db_name), fake_data)
+        populate_db(select_or_create_db(couchdb_client, db_name), fake_data)
 
     # Get pods
-    pods = get_pods(namespace)
+    # pods = get_pods(namespace)
 
     # Watch Pods
     # watch_pods(namespace)
 
     # Delete pods
-    # delete_pods(pods, namespace)
+    delete_pods(pods, namespace)
+
+    logging.info(f"sleeping 60 seconds...")
+    time.sleep(90)
+    # Reconnect couchdb
+    couchdb_client = get_couch_client(couchdb_url)
 
     # Compare data with the database data
-    # compare_data(couchserver, fake_data)
+    compare_data(couchdb_client, fake_data)
 
 
 def scenario_2_delete_some_pods(couchserver, namespace, n_rows, db_names):
