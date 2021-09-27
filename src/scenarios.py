@@ -20,9 +20,9 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     :param list pods: Pod names to manipulate 
     :return: True or false
     """
-    print(f"executing scenario 1")
+    logging.info(f"executing scenario 1")
 
-    # Connect to client couchdb
+    # Get couchdb Client
     couchdb_client = get_couch_client(couchdb_url)
 
     # Clear DBS
@@ -32,8 +32,7 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     fake_data = generate_random_data(n_rows)
 
     # Populate dbs with mock data
-    for db_name in db_names:
-        populate_db(select_or_create_db(couchdb_client, db_name), fake_data)
+    populate_dbs(couchdb_client, db_names, fake_data)
 
     # Get pods
     # pods = get_pods(namespace)
@@ -44,10 +43,8 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     # Delete pods
     delete_pods(pods, namespace)
 
-    logging.info(f"sleeping 60 seconds...")
-    time.sleep(90)
-    # Reconnect couchdb
-    couchdb_client = get_couch_client(couchdb_url)
+    # logging.info(f"sleeping 90 seconds...")
+    # time.sleep(90)
 
     # Compare data with the database data
     compare_data(couchdb_client, fake_data)
