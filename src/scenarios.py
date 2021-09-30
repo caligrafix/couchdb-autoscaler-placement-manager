@@ -66,7 +66,7 @@ def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
 
     delete_pods(pods, namespace)
 
-    watch_state_pods(pods, namespace)
+    watch_pods_state(pods, namespace)
 
     populate_dbs(couchdb_client, db_names, data)
 
