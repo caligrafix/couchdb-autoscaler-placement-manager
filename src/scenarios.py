@@ -34,12 +34,6 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     # Populate dbs with mock data
     populate_dbs(couchdb_client, db_names, fake_data)
 
-    # Get pods
-    # pods = get_pods(namespace)
-
-    # Watch Pods
-    # watch_pods(namespace)
-
     # Delete pods
     delete_pods(pods, namespace)
 
@@ -50,10 +44,15 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
 def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
     """Scenario 2:
 
-                Delete some pods and verify if we can read and write in couchdb
+        Delete some pods and verify if we can read and write in couchdb
 
+    Steps:
+    - Get Couchdb Client
+    - Get database initial Info
+    - Generate faker data
     - Delete pods
-    - Insert data in couchdb
+    - Watch for pods states
+    - Insert data in couchdb when pods are down
     """
     logging.info(f"executing scenario 2")
 
@@ -63,20 +62,13 @@ def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
     logging.info(f"Get database initial info:")
     get_database_info(couchdb_client)
 
-    delete_pods(pods, namespace)
-
     data = generate_random_data(n_rows)
 
-    logging.info(f"sleeping 10 seconds and wait to pod deleting")
-    time.sleep(10)
+    delete_pods(pods, namespace)
+
+    watch_state_pods(pods, namespace)
+
     populate_dbs(couchdb_client, db_names, data)
 
     logging.info(f"Get database final info:")
     get_database_info(couchdb_client)
-
-    # for db_name in db_names:
-    #     try:
-    #         db = select_or_create_db(couchdb_client, db_name)
-    #         populate_db(db, data)
-    #     except:
-    #         raise Exception("Error while trying to upload data in CouchDB")
