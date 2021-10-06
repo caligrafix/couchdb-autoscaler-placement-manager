@@ -72,3 +72,23 @@ def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
 
     logging.info(f"Get database final info:")
     get_database_info(couchdb_client)
+
+
+def scenario_3_resize_pvc(namespace, pods):
+    """
+    Resize pvc associate to a specific pods
+
+    Steps:
+    - Edit associate PVC to a pods:
+      - Edit spec.resources.requests.storage attribute
+    - Terminate Pod
+    - Watch status of pod and get new values to storage capacity
+
+    """
+
+    logging.info(f"executing scenario 3")
+
+    # Get PVC Of Pods
+    pod_pvc_info = get_related_pod_pvc(pods, namespace)
+
+    logging.info(f"Pod pvc info: {pod_pvc_info}")
