@@ -90,5 +90,16 @@ def scenario_3_resize_pvc(namespace, pods):
 
     # Get PVC Of Pods
     pod_pvc_info = get_related_pod_pvc(pods, namespace)
-
     logging.info(f"Pod pvc info: {pod_pvc_info}")
+
+    # Patch PVC
+    logging.info(f"Patching PVC...")
+    spec_body = {"spec": {"resources": {"requests": {"storage": "2Gi"}}}}
+    patch_namespaced_pvc(namespace, pod_pvc_info, spec_body)
+
+    logging.info(f"Sleeping 10 seconds... ")
+    time.sleep(10)
+
+    # Delete pod to recreate and use resized PV
+    logging.info(f"Deleting pod")
+    delete_pods(pods, namespace)
