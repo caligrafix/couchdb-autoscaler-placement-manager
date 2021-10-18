@@ -1,4 +1,5 @@
 import time
+import os
 import logging
 from src.couch import *
 from src.k8s import *
@@ -90,7 +91,6 @@ def scenario_3_resize_pvc(namespace, pods):
 
     # Get PVC Of Pods
     pod_pvc_info = get_related_pod_pvc(pods, namespace)
-    logging.info(f"Pod pvc info: {pod_pvc_info}")
 
     # Patch PVC
     logging.info(f"Patching PVC...")
@@ -103,3 +103,21 @@ def scenario_3_resize_pvc(namespace, pods):
     # Delete pod to recreate and use resized PV
     logging.info(f"Deleting pod")
     delete_pods(pods, namespace)
+
+
+def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, namespace, pods):
+    """
+    1. Get DB Client
+    2. Generate Fake data
+    3. Populate DB 
+    4. Monitoring the size of PV associate to pod with df command
+    5. If size exceeds the defined umbral
+      5.1. Scale PVC
+    """
+    # perc_usage = 0
+
+    # while(perc_usage < 0.7):
+    for pod in pods:
+        exec_command = ['df', '-h', '/opt/couchdb/data']
+        logging.info(f"Executing df in pod {pod}")
+        resp = execute_exec_pod(exec_command, namespace, pod)
