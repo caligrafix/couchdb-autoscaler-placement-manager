@@ -1,8 +1,8 @@
 import time
-import os
 import logging
 from src.couch import *
 from src.k8s import *
+from tqdm import tqdm
 
 
 def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
@@ -105,7 +105,7 @@ def scenario_3_resize_pvc(namespace, pods):
     delete_pods(pods, namespace)
 
 
-def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, namespace, pods):
+def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, pod):
     """
     1. Get DB Client
     2. Generate Fake data
@@ -114,10 +114,15 @@ def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, namespace, pods):
     5. If size exceeds the defined umbral
       5.1. Scale PVC
     """
-    # perc_usage = 0
+    perc_usage = 0
+    couchdb_client = get_couch_client(couchdb_url)
 
-    # while(perc_usage < 0.7):
-    for pod in pods:
-        exec_command = ['df', '-h', '/opt/couchdb/data']
-        logging.info(f"Executing df in pod {pod}")
-        resp = execute_exec_pod(exec_command, namespace, pod)
+    while(perc_usage < 0.5):
+        data = generate_random_data(n_rows)
+        populate_dbs(couchdb_client, db_names, data)
+        logging.info(f"populated dbs")
+        exec_command = ['df', '-Ph', '/opt/couchdb/data']
+        resp = execute_exec_pod(exec_command, namespace, pod[0])
+        df_output_lines = [s.split() for s in resp.splitlines()]
+        perc_usage = float(df_output_lines[1][4].strip('%'))/100
+        logging.info(f"%Use: {perc_usage}")
