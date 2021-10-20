@@ -106,7 +106,7 @@ def scenario_3_resize_pvc(namespace, pods):
     delete_pods(pods, namespace)
 
 
-def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, pod):
+def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, pods):
     """
     1. Get DB Client
     2. Generate Fake data
@@ -115,29 +115,34 @@ def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, p
     5. If size exceeds the defined umbral
       5.1. Scale PVC
     """
-    perc_usage = 0
-    total = 0.5
+    greater_vol_perc_usage = 0
+    umbral = 0.5
     couchdb_client = get_couch_client(couchdb_url)
+    mount_volume_path = '/opt/couchdb/data'
 
     # Clear DBS
     # clear_dbs(couchdb_client)
 
-    bar = progressbar.ProgressBar(maxval=total,
+    bar = progressbar.ProgressBar(maxval=umbral,
                                   widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     logging.info(f"Start Loop")
-    while(perc_usage < total):
+    while(greater_vol_perc_usage < umbral):
         # Generate random data and populate DB
         data = generate_random_data(n_rows)
         populate_dbs(couchdb_client, db_names, data)
 
-        # Execute command df inside POD to obtain %Use of volume
-        exec_command = ['df', '-Ph', '/opt/couchdb/data']
-        resp = execute_exec_pod(exec_command, namespace, pod[0])
-        df_output_lines = [s.split() for s in resp.splitlines()]
-        perc_usage = float(df_output_lines[1][4].strip('%'))/100
-        logging.info(f"%Use: {perc_usage}")
-        bar.update(perc_usage)
+        pods_volumes_info = get_pods_volumes_info(
+            namespace, pods, mount_volume_path)
+
+        greater_pod_vol = max(pods_volumes_info, key=pods_volumes_info.get)
+        greater_vol_perc_usage = pods_volumes_info[greater_pod_vol]
+
+        logging.info(f"% Use of all pods: {pods_volumes_info}")
+        logging.info(f"% Pod with greater vol: {greater_pod_vol}")
+        logging.info(f"% Use greater vol: {greater_vol_perc_usage}")
+        bar.update(greater_vol_perc_usage)
     bar.finish()
 
-    logging.info(f"%Use > 50%, Scaling PVC associated")
+    logging.info(
+        f"%Use > 50%, Scaling PVC associated to POD {greater_pod_vol}")
