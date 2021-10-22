@@ -1,9 +1,35 @@
 import time
 import logging
-import progressbar
+from tqdm import tqdm
 from src.couch import *
 from src.k8s import *
 from src.utils import *
+
+
+def scenario_0_populate_couchdb(couchdb_url, n_rows, n_it, db_names, clear=False):
+    """Scenario 0 - Populate COUCHDB Cluster
+
+    :param Object couchdb_url: CouchDB URL Connection
+    :param str namespace: Kubernetes namespace
+    :param int n_rows: Number of rows to insert in DBs
+    :param list db_names: Names of the dbs to insert data
+    """
+    logging.info(f"Executing scenario 0, populate databases")
+    logging.info(f"N_ROWS: {n_rows} - N_IT: {n_it}")
+
+    couchdb_client = get_couch_client(couchdb_url)
+
+    if clear:
+        clear_dbs(couchdb_client)
+
+    # bar = progressbar.ProgressBar(maxval=n_it,
+    #                               widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    # bar.start()
+
+    for i in tqdm(range(n_it)):
+        fake_data = generate_random_data(n_rows)
+        populate_dbs(couchdb_client, db_names, fake_data)
+        # bar.update(i)
 
 
 def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
@@ -15,7 +41,7 @@ def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
     - Get pods and load in list
     - Delete all pods in namespace
 
-    :param Object couchserver: CouchDB Client Object
+    :param Object couchdb_url: CouchDB Client Object
     :param str namespace: Kubernetes namespace
     :param int n_rows: Number of rows to insert in DBs
     :param list db_names: Names of the dbs to insert data
