@@ -8,3 +8,6 @@ docker push gitlab-registry.caligrafix.cl:443/ecaligrafix/couchdb-k8s-stress-tes
 
 sleep 1m
 kubectl create -f k8s-files/pod.yaml
+
+sleep 30s
+kubectl logs -f couchdb-k8s-stress-tests-s-0

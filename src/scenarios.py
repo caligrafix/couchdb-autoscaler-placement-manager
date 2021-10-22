@@ -1,9 +1,31 @@
+import io
 import time
 import logging
 from tqdm import tqdm
 from src.couch import *
 from src.k8s import *
 from src.utils import *
+
+
+class TqdmToLogger(io.StringIO):
+    """
+        Output stream for TQDM which will output to logger module instead of
+        the StdOut.
+    """
+    logger = None
+    level = None
+    buf = ''
+
+    def __init__(self, logger, level=None):
+        super(TqdmToLogger, self).__init__()
+        self.logger = logger
+        self.level = level or logging.INFO
+
+    def write(self, buf):
+        self.buf = buf.strip('\r\n\t ')
+
+    def flush(self):
+        self.logger.log(self.level, self.buf)
 
 
 def scenario_0_populate_couchdb(couchdb_url, n_rows, n_it, db_names, clear=False):
@@ -16,20 +38,18 @@ def scenario_0_populate_couchdb(couchdb_url, n_rows, n_it, db_names, clear=False
     """
     logging.info(f"Executing scenario 0, populate databases")
     logging.info(f"N_ROWS: {n_rows} - N_IT: {n_it}")
+    logger = logging.getLogger()
+
+    tqdm_out = TqdmToLogger(logger, level=logging.INFO)
 
     couchdb_client = get_couch_client(couchdb_url)
 
     if clear:
         clear_dbs(couchdb_client)
 
-    # bar = progressbar.ProgressBar(maxval=n_it,
-    #                               widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    # bar.start()
-
-    for i in tqdm(range(n_it)):
+    for i in tqdm(range(n_it), file=tqdm_out, mininterval=30,):
         fake_data = generate_random_data(n_rows)
         populate_dbs(couchdb_client, db_names, fake_data)
-        # bar.update(i)
 
 
 def scenario_1_delete_all_pods(couchdb_url, namespace, n_rows, db_names, pods):
@@ -149,9 +169,6 @@ def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, p
     # Clear DBS
     # clear_dbs(couchdb_client)
 
-    bar = progressbar.ProgressBar(maxval=umbral,
-                                  widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    bar.start()
     logging.info(f"Start Loop")
     while(greater_vol_perc_usage < umbral):
         # Generate random data and populate DB
@@ -167,8 +184,6 @@ def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, p
         logging.info(f"% Use of all pods: {pods_volumes_info}")
         logging.info(f"% Pod with greater vol: {greater_pod_vol}")
         logging.info(f"% Use greater vol: {greater_vol_perc_usage}")
-        bar.update(greater_vol_perc_usage)
-    bar.finish()
 
     logging.info(
         f"%Use > 50%, Scaling PVC associated to POD {greater_pod_vol}")
