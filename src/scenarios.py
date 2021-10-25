@@ -152,38 +152,41 @@ def scenario_3_resize_pvc(namespace, pods):
     delete_pods(pods, namespace)
 
 
-def scenario_4_scaling_pvc_on_demand(couchdb_url, n_rows, db_names, namespace, pods):
+def scenario_4_scaling_pvc_on_demand(namespace, pods, VOLUME_THRESHOLD, MOUNT_VOLUME_PATH):
     """
-    1. Get DB Client
-    2. Generate Fake data
-    3. Populate DB 
-    4. Monitoring the size of PV associate to pod with df command
-    5. If size exceeds the defined umbral
+    1. Monitoring the size of PV associate to pod with df command
+    2. If size exceeds the defined threshold
       5.1. Scale PVC
     """
     greater_vol_perc_usage = 0
-    umbral = 0.5
-    couchdb_client = get_couch_client(couchdb_url)
-    mount_volume_path = '/opt/couchdb/data'
-
-    # Clear DBS
-    # clear_dbs(couchdb_client)
 
     logging.info(f"Start Loop")
-    while(greater_vol_perc_usage < umbral):
-        # Generate random data and populate DB
-        data = generate_random_data(n_rows)
-        populate_dbs(couchdb_client, db_names, data)
 
-        pods_volumes_info = get_pods_volumes_info(
-            namespace, pods, mount_volume_path)
+    pods_volumes_info = get_pods_volumes_info(
+        namespace, pods, MOUNT_VOLUME_PATH
+    )
 
-        greater_pod_vol = max(pods_volumes_info, key=pods_volumes_info.get)
-        greater_vol_perc_usage = pods_volumes_info[greater_pod_vol]
+    pods_over_threshold = []
 
-        logging.info(f"% Use of all pods: {pods_volumes_info}")
-        logging.info(f"% Pod with greater vol: {greater_pod_vol}")
-        logging.info(f"% Use greater vol: {greater_vol_perc_usage}")
+    for pod, size in pods_volumes_info.items():
+        if size >= VOLUME_THRESHOLD:
+            pods_over_threshold.append(pod)
+
+    greater_pod_vol = max(pods_volumes_info, key=pods_volumes_info.get)
+    greater_vol_perc_usage = pods_volumes_info[greater_pod_vol]
+
+    logging.info(f"% Use of all pods: {pods_volumes_info}")
+    logging.info(f"Pods over threshold: {pods_over_threshold}")
+    logging.info(f"% Pod with greater vol: {greater_pod_vol}")
+    logging.info(f"% Use greater vol: {greater_vol_perc_usage}")
+
+    # Check size is upper VOLUME_UMBRAL
+    if pods_over_threshold:
+        logging.info(f"Resizing PVC of pods {pods_over_threshold}")
+        scenario_3_resize_pvc(namespace, pods_over_threshold)
+    else:
+        logging.info(f"No Volumes to Resize")
+        return 0
 
     logging.info(
         f"%Use > 50%, Scaling PVC associated to POD {greater_pod_vol}")
