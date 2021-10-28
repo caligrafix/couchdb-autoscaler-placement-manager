@@ -121,7 +121,7 @@ def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
     get_database_info(couchdb_client)
 
 
-def scenario_3_resize_pvc(namespace, pods):
+def scenario_3_resize_pvc(namespace, pods, VOLUME_RESIZE_PERCENTAGE):
     """
     Resize pvc associate to a specific pods
 
@@ -140,10 +140,9 @@ def scenario_3_resize_pvc(namespace, pods):
 
     # Patch PVC
     logging.info(f"Patching PVC...")
-    spec_body = {"spec": {"resources": {"requests": {"storage": "2Gi"}}}}
-    patch_namespaced_pvc(namespace, pod_pvc_info, spec_body)
+    patch_namespaced_pvc(namespace, pod_pvc_info, VOLUME_RESIZE_PERCENTAGE)
 
-    logging.info(f"Sleeping 10 seconds... ")
+    # logging.info(f"Sleeping 10 seconds... ")
     time.sleep(10)
 
     # Delete pod to recreate and use resized PV
