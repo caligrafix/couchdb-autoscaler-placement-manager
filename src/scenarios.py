@@ -136,15 +136,15 @@ def scenario_3_resize_pvc(namespace, pods, VOLUME_RESIZE_PERCENTAGE):
     logging.info(f"executing scenario 3")
 
     # Get PVC Of Pods
-    pod_pvc_info = get_related_pod_pvc(pods, namespace)
+    pods_pvc_info = get_related_pod_pvc(pods, namespace)
 
     # Patch PVC
     logging.info(f"Patching PVC...")
-    patch_namespaced_pvc(namespace, pod_pvc_info, VOLUME_RESIZE_PERCENTAGE)
+    patch_namespaced_pvc(namespace, pods_pvc_info, VOLUME_RESIZE_PERCENTAGE)
 
     # logging.info(f"Sleeping 10 seconds... ")
     time.sleep(10)
 
-    # Delete pod to recreate and use resized PV
-    logging.info(f"Deleting pod")
-    delete_pods(pods, namespace)
+    # # Delete pod to recreate and use resized PV
+    # logging.info(f"Deleting pod")
+    # delete_pods(pods, namespace)
