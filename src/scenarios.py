@@ -47,6 +47,8 @@ def scenario_0_populate_couchdb(couchdb_url, n_rows, n_it, db_names, clear=False
         clear_dbs(couchdb_client)
 
     for i in tqdm(range(n_it), file=tqdm_out, mininterval=30,):
+        if clear:
+            clear_dbs(couchdb_client)
         fake_data = generate_random_data(n_rows)
         populate_dbs(couchdb_client, db_names, fake_data)
 
@@ -148,3 +150,19 @@ def scenario_3_resize_pvc(namespace, pods, VOLUME_RESIZE_PERCENTAGE):
     # # Delete pod to recreate and use resized PV
     # logging.info(f"Deleting pod")
     # delete_pods(pods, namespace)
+
+
+def scenario_4_stress_couchdb(couchdb_url, n_rows, n_it, clear=True):
+    # Create views in couchdb to stress cpu consumption
+    couch_client = get_couch_client(couchdb_url)
+
+    db_names = [f'python{i}' for i in range(19)]
+    fake_data = generate_random_data(n_rows)
+
+    while n_it > 0:
+        if clear:
+            clear_dbs(couch_client)
+        populate_dbs(couch_client, db_names, fake_data)
+        n_it -= 1
+        logging.info(f"generated faked data: {n_it}")
+    # logging.info(map_fun)
