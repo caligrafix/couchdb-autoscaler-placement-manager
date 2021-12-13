@@ -4,7 +4,7 @@ helm uninstall couchdb
 kubectl delete pvc --all
 kubectl delete pv --all
 # helm install couchdb couchdb/couchdb --values couch-config.yml 
-helm install couchdb charts/couchdb-3.3.4/couchdb/ --values couch-config.yml
+helm install couchdb charts/couchdb-3.3.4/couchdb/ --values charts/couch-values.yaml
 
 #recreate vpa
 # kubectl delete vpa couchdb-vpa
