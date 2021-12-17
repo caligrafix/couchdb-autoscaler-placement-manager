@@ -124,16 +124,20 @@ def scenario_2_delete_some_pods(couchdb_url, namespace, n_rows, db_names, pods):
 
 
 def scenario_3_resize_pvc(namespace, pods, VOLUME_RESIZE_PERCENTAGE):
-    """
-    Resize pvc associate to a specific pods
+    '''Resize pvc associate to a specific pods
+
+    Args:
+        namespace (str)                 : k8s namespace to find pods
+        pods (list)                     : list of pods names to resize his PVC
+        VOLUME_RESIZE_PERCENTAGE (float): % of volume to increase capacity
 
     Steps:
-    - Edit associate PVC to a pods:
-      - Edit spec.resources.requests.storage attribute
-    - Terminate Pod
-    - Watch status of pod and get new values to storage capacity
+        - Edit associate PVC to a pods:
+        - Edit spec.resources.requests.storage attribute
+        - Terminate Pod
+        - Watch status of pod and get new values to storage capacity
 
-    """
+    '''
 
     logging.info(f"executing scenario 3")
 
