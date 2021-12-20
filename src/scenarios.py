@@ -27,14 +27,15 @@ class TqdmToLogger(io.StringIO):
         self.logger.log(self.level, self.buf)
 
 
-def scenario_0_populate_couchdb(couchdb_url, n_rows, n_it, db_names, clear=False):
-    """Scenario 0 - Populate COUCHDB Cluster
+def scenario_0_populate_couchdb(couchdb_url: str, n_rows: int, n_it: int, db_names: list, clear: bool = False):
+    '''Scenario 0 - Populate COUCHDB Cluster
 
-    :param Object couchdb_url: CouchDB URL Connection
-    :param str namespace: Kubernetes namespace
-    :param int n_rows: Number of rows to insert in DBs
-    :param list db_names: Names of the dbs to insert data
-    """
+    Args:
+        couchdb_url (str): CouchDB URL Connection
+        n_rows (int): Number of rows to insert in DBs
+        n_it (int): Number of iterations to insert data in DBs
+        db_names (list): Names of the dbs to insert data
+    '''
     logging.info(f"Executing scenario 0, populate databases")
     logging.info(f"N_ROWS: {n_rows} - N_IT: {n_it}")
     logger = logging.getLogger()
