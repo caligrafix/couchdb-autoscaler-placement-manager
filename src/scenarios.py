@@ -45,11 +45,9 @@ def scenario_0_populate_couchdb(couchdb_url: str, n_rows: int, n_it: int, db_nam
     couchdb_client = get_couch_client(couchdb_url)
 
     if clear:
-        clear_dbs(couchdb_client)
+        clear_dbs(couchdb_client) 
 
     for i in tqdm(range(n_it), file=tqdm_out, mininterval=30,):
-        if clear:
-            clear_dbs(couchdb_client)
         fake_data = generate_random_data(n_rows)
         populate_dbs(couchdb_client, db_names, fake_data)
 
