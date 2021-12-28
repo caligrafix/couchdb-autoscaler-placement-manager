@@ -39,7 +39,6 @@ def scenario_0_populate_couchdb(couchdb_url: str, n_rows: int, n_it: int, db_nam
     logging.info(f"Executing scenario 0, populate databases")
     logging.info(f"N_ROWS: {n_rows} - N_IT: {n_it}")
     logger = logging.getLogger()
-
     tqdm_out = TqdmToLogger(logger, level=logging.INFO)
 
     couchdb_client = get_couch_client(couchdb_url)
@@ -146,13 +145,6 @@ def scenario_3_resize_pvc(namespace, pods, VOLUME_RESIZE_PERCENTAGE):
     # Patch PVC
     logging.info(f"Patching PVC...")
     patch_namespaced_pvc(namespace, pods_pvc_info, VOLUME_RESIZE_PERCENTAGE)
-
-    # logging.info(f"Sleeping 10 seconds... ")
-    time.sleep(10)
-
-    # # Delete pod to recreate and use resized PV
-    # logging.info(f"Deleting pod")
-    # delete_pods(pods, namespace)
 
 
 def scenario_4_stress_couchdb(couchdb_url, n_rows, n_it, clear=True):
