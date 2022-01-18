@@ -1,6 +1,6 @@
 # CouchDB Cluster Placement Manager
 
-This repo contains three main topics, can be used in conjunction with [couchdb-helm repo](https://github.com/fsalazarh/couchdb-helm/tree/cluster_config) to setup a cluster of couchdb with automated placement tagging and volume monitor and autoscaling with Helm. For more information visit the repo and follow instructions to deploy.
+This repo automate the couchdb nodes by tagging them with the zone  attribute pulled from kubernetes cluster.
 
 Table of Contents
 - [CouchDB Cluster Placement Manager](#couchdb-cluster-placement-manager)
@@ -12,7 +12,7 @@ Table of Contents
     ├── src                   # Principal Code
     │   ├── couch             # Couchdb Functions
     │   ├── k8s               # Kubernetes Functions
-    │   ├── envs.py           # Kubernetes Functions
+    │   ├── envs.py           # Environment Variables
     │   ├── scripts.py        # Placement tagging Script 
     ├── Dockerfile            # To build this image
     ├── main.py               # Main file 
