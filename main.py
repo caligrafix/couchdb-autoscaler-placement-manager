@@ -1,10 +1,8 @@
 # External libraries
 import sys
-import time
 import logging
 
 # Internal code
-from src.scenarios import *
 from src.scripts import *
 from src.envs import *
 
