@@ -176,7 +176,7 @@ def tag_cluster_nodes(couchdb_url: str, nodes_with_pods: list):
             }
 
             # try:
-            res_put = requests.put(full_url, json=payload, params={'w':24})
+            res_put = requests.put(full_url, json=payload, params={'w': len(pods)})
             res_put.raise_for_status()
             logging.info(f"update node res: {res_put.json()}")
             # Get latest rev to find the updated doc 
